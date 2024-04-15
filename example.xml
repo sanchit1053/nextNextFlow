@@ -1,0 +1,27 @@
+<process>
+	<sayHello>
+		<input>  </input>
+		<output> channelName </output>
+		<command>
+			```
+			echo 'Hello World'
+			echo 'hi'
+			```
+		</command>
+	</sayHello>
+	<sayBye>
+		<input> channelName </input>
+		<output> </output>
+		<command>
+			```
+			echo 'Bye World'
+			echo 'bye'
+			```
+		</command>
+	</sayBye>
+</process>
+
+<channel>
+	<channelName> </channelName>
+</channel>
+
