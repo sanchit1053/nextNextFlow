@@ -2,6 +2,7 @@
 #include "logger.hpp"
 #include <fmt/core.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <fstream>
 #include <filesystem>
 
@@ -14,6 +15,7 @@ Container::Container(const config &config)
     m_config.m_script = config.m_script;
     m_config.m_input_channels = config.m_input_channels;
     m_config.m_output_channel = config.m_output_channel;
+    m_config.m_output_mapping = config.m_output_mapping;
     if (m_config.m_input_channels.size() != m_config.m_input_names.size())
     {
         LOG(ERROR, "Incorrect input length");
@@ -23,7 +25,7 @@ Container::Container(const config &config)
     system(f.c_str());
 }
 
-void Container::run()
+pid_t Container::run()
 {
     for (int i = 0; i < (int)m_config.m_input_names.size(); i++)
     {
@@ -48,7 +50,33 @@ void Container::run()
     std::filesystem::remove("temp");
 
     system(fmt::format("docker exec {} chmod 755 /script.sh", m_config.m_name).c_str());
-    system(fmt::format("docker exec {} /script.sh", m_config.m_name).c_str());
+    pid_t child = fork();
+    if (child == 0)
+    {
+        system(fmt::format("docker exec {} /script.sh", m_config.m_name).c_str());
+        exit(0);
+    }
+    else
+    {
+        (*m_config.m_output_mapping)[child] = this;
+    }
+    return child;
+}
+
+void Container::output()
+{
+    system(fmt::format("docker cp {}:{} scratch/", m_config.m_name, m_config.m_output_name).c_str());
+
+    std::ifstream fin;
+    fin.open(fmt::format("scratch/{}",m_config.m_output_name));
+    std::stringstream data;
+    data << fin.rdbuf();
+    if (!m_config.m_output_channel->push(data.str()))
+    {
+        LOG(ERROR, "Failed to push data");
+    }
+    fin.close();
+    std::filesystem::remove(fmt::format("scratch/{}",m_config.m_output_name));
 }
 
 Container::~Container()

@@ -10,6 +10,7 @@ class RawChannel
 {
 public:
     virtual bool push(std::string serial_data) = 0;
+    virtual bool poll() = 0;
     virtual std::string pop() = 0;
 };
 
@@ -30,6 +31,7 @@ private:
 public:
     Channel(config config);
     virtual bool push(std::string serial_data);
+    virtual bool poll();
     virtual std::string pop();
 };
 
@@ -54,6 +56,12 @@ bool Channel<T>::push(std::string serial_data)
         return false;
     }
     
+}
+
+template <class T>
+bool Channel<T>::poll()
+{
+    return m_queue.size() > 0;
 }
 
 template <class T>

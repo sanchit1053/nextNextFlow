@@ -22,6 +22,7 @@ public:
         std::string m_script;
         std::vector<RawChannel *> m_input_channels;
         RawChannel *m_output_channel;
+        std::unordered_map<pid_t, Container *> *m_output_mapping;
     };
 
 private:
@@ -29,7 +30,8 @@ private:
 
 public:
     Container(const config &config);
-    void run();
+    pid_t run();
+    void output();
     ~Container();
 };
 
