@@ -4,6 +4,7 @@
 #include "channel.hpp"
 #include <vector>
 #include <string>
+#include <memory>
 
 /**
  * The script of the container must treat the input and output as files
@@ -11,16 +12,24 @@
 */
 class Container
 {
+public:
+    struct config
+    {
+        std::string m_image_name;
+        std::string m_name;
+        std::vector<std::string> m_input_names;
+        std::string m_output_name;
+        std::string m_script;
+        std::vector<RawChannel *> m_input_channels;
+        RawChannel *m_output_channel;
+    };
+
 private:
-    std::string m_image_name;
-    std::string m_name;
-    std::vector<std::string> m_input_names;
-    std::string m_output_name;
-    std::string m_script;
+    config m_config;
 
 public:
-    Container(const std::string &image_name, const std::string &name, const std::vector<std::string> &input_names, const std::string &output_name, const std::string &script);
-    void run(std::vector<Channel> &input_channels, Channel &output_channel);
+    Container(const config &config);
+    void run();
     ~Container();
 };
 
