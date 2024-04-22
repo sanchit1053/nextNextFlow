@@ -36,7 +36,6 @@ pid_t Container::run()
         fout.close();
         system(fmt::format("docker cp temp {}:/{}", m_config.m_name, m_config.m_input_names[i]).c_str());
     }
-    
     std::ofstream fout;
     fout.open("temp");
     fout.close();

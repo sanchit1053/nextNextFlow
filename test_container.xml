@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<workflow
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:noNamespaceSchemaLocation="workflow.xsd">
+
+<channel name="c1"/>
+<channel name="c2"/>
+<process name="p1">
+    <input>c1</input>
+    <output>c2</output>
+    <command>#!/bin/sh&#xA;sleep 1&#xA;cat c1&#xA;cat c1 &gt; c2</command>
+</process>
+
+</workflow>
