@@ -1,10 +1,19 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
+ <xs:simpleType name="globalType" final="restriction" >
+    <xs:restriction base="xs:string">
+        <xs:enumeration value="none"/>
+        <xs:enumeration value="in"/>
+        <xs:enumeration value="out"/>
+    </xs:restriction>
+</xs:simpleType>
+
 <xs:complexType name="channelType">
     <xs:sequence>
         <xs:element name="input" type="xs:string" minOccurs="0"/>
         <xs:element name="output" type="xs:string" minOccurs="0"/>
+        <xs:element name="global" type="globalType" minOccurs="0"/>
     </xs:sequence>
     <xs:attribute name="name" type="xs:string" use="required"/>
 </xs:complexType>

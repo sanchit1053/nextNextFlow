@@ -11,9 +11,10 @@ namespace Handler
 {
    std::function<void(int)> _handler;
    void signal_handler(int signal) {_handler(signal);}
+   void setup_handler(std::unordered_map<pid_t, Container *> &output_mapping);
 }
 
-void setup_handler(std::unordered_map<pid_t, Container *> &output_mapping)
+void Handler::setup_handler(std::unordered_map<pid_t, Container *> &output_mapping)
 {
     Handler::_handler = [&output_mapping](int sig){
       pid_t pid = wait(NULL);

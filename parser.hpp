@@ -6,14 +6,24 @@
 #include "logger.hpp"
 #include "rapidxml-1.13/rapidxml.hpp"
 #include "rapidxml-1.13/rapidxml_utils.hpp"
+#include <tuple>
 
-void parse(const std::string &filename, std::unordered_map<std::string, RawChannel *> &channels, std::unordered_map<std::string, Container *> &processes, std::unordered_map<pid_t, Container *> &output_mapping)
+namespace Parser
+{
+    std::string IN = "in";
+    std::string OUT = "out";
+    std::pair<RawChannel *, RawChannel *> parse(const std::string &filename, std::unordered_map<std::string, RawChannel *> &channels, std::unordered_map<std::string, Container *> &processes, std::unordered_map<pid_t, Container *> &output_mapping);
+};
+
+std::pair<RawChannel *, RawChannel *> Parser::parse(const std::string &filename, std::unordered_map<std::string, RawChannel *> &channels, std::unordered_map<std::string, Container *> &processes, std::unordered_map<pid_t, Container *> &output_mapping)
 {
     rapidxml::xml_document<> doc;
     rapidxml::file<> xmlFile(filename.c_str());
     doc.parse<0>(xmlFile.data());
 
     rapidxml::xml_node<> *workflow_node = doc.first_node("workflow");
+
+    std::pair<RawChannel *, RawChannel *> io_pair;
 
     for (rapidxml::xml_node<> *channel_node = workflow_node->first_node("channel");
          channel_node != nullptr;
@@ -26,6 +36,17 @@ void parse(const std::string &filename, std::unordered_map<std::string, RawChann
             [](std::string s)
             { return s; },
         }));
+        if (channel_node->first_node("global"))
+        {
+            if (channel_node->first_node("global")->value() == Parser::IN)
+            {
+                io_pair.first = channels[name];
+            }
+            if (channel_node->first_node("global")->value() == Parser::OUT)
+            {
+                io_pair.second = channels[name];
+            }
+        }
     }
 
     for (rapidxml::xml_node<> *process_node = workflow_node->first_node("process");
@@ -49,7 +70,7 @@ void parse(const std::string &filename, std::unordered_map<std::string, RawChann
         processes[name] = new Container(
             Container::config(
                 {"nginx:alpine",
-                 "Mycontainer",
+                 name,
                  input_names,
                  output_name,
                  script,
@@ -57,6 +78,7 @@ void parse(const std::string &filename, std::unordered_map<std::string, RawChann
                  output_channel,
                  &output_mapping}));
     }
+    return io_pair;
 }
 
 #endif

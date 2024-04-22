@@ -30,6 +30,7 @@ private:
 
 public:
     Container(const config &config);
+    bool poll();
     pid_t run();
     void output();
     ~Container();

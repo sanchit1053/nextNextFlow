@@ -7,13 +7,19 @@ xsi:noNamespaceSchemaLocation="workflow.xsd">
 <channel name="c1">
     <global>in</global>
 </channel>
-<channel name="c2">
+<channel name="c2"/>
+<channel name="c3">
     <global>out</global>
 </channel>
 <process name="p1">
     <input>c1</input>
     <output>c2</output>
-    <command>#!/bin/sh&#xA;sleep 1&#xA;cat c1&#xA;cat c1 &gt; c2</command>
+    <command>#!/bin/sh&#xA;sleep 1&#xA;cat c1  | cut -c -6 &gt; c2</command>
+</process>
+<process name="p2">
+    <input>c2</input>
+    <output>c3</output>
+    <command>#!/bin/sh&#xA;sleep 1&#xA;cat c2  | cut -c 2- &gt; c3</command>
 </process>
 
 </workflow>

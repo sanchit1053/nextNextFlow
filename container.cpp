@@ -25,6 +25,20 @@ Container::Container(const config &config)
     system(f.c_str());
 }
 
+bool Container::poll()
+{
+    bool ret = true;
+    for (auto &it : m_config.m_input_channels)
+    {
+        ret = ret & it->poll();
+        if (!ret)
+        {
+            break;
+        }
+    }
+    return ret;
+}
+
 pid_t Container::run()
 {
     for (int i = 0; i < (int)m_config.m_input_names.size(); i++)
