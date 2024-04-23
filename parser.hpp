@@ -12,10 +12,10 @@ namespace Parser
 {
     std::string IN = "in";
     std::string OUT = "out";
-    std::pair<RawChannel *, RawChannel *> parse(const std::string &filename, std::unordered_map<std::string, RawChannel *> &channels, std::unordered_map<std::string, Container *> &processes, std::unordered_map<pid_t, Container *> &output_mapping);
+    std::pair<std::vector<RawChannel *>, RawChannel *> parse(const std::string &filename, std::unordered_map<std::string, RawChannel *> &channels, std::unordered_map<std::string, Container *> &processes, std::unordered_map<pid_t, Container *> &output_mapping);
 };
 
-std::pair<RawChannel *, RawChannel *> Parser::parse(const std::string &filename, std::unordered_map<std::string, RawChannel *> &channels, std::unordered_map<std::string, Container *> &processes, std::unordered_map<pid_t, Container *> &output_mapping)
+std::pair<std::vector<RawChannel *>, RawChannel *> Parser::parse(const std::string &filename, std::unordered_map<std::string, RawChannel *> &channels, std::unordered_map<std::string, Container *> &processes, std::unordered_map<pid_t, Container *> &output_mapping)
 {
     rapidxml::xml_document<> doc;
     rapidxml::file<> xmlFile(filename.c_str());
@@ -23,7 +23,7 @@ std::pair<RawChannel *, RawChannel *> Parser::parse(const std::string &filename,
 
     rapidxml::xml_node<> *workflow_node = doc.first_node("workflow");
 
-    std::pair<RawChannel *, RawChannel *> io_pair;
+    std::pair<std::vector<RawChannel *>, RawChannel *> io_pair;
 
     for (rapidxml::xml_node<> *channel_node = workflow_node->first_node("channel");
          channel_node != nullptr;
@@ -40,13 +40,17 @@ std::pair<RawChannel *, RawChannel *> Parser::parse(const std::string &filename,
         {
             if (channel_node->first_node("global")->value() == Parser::IN)
             {
-                io_pair.first = channels[name];
+                io_pair.first.push_back(channels[name]);
             }
             if (channel_node->first_node("global")->value() == Parser::OUT)
             {
                 io_pair.second = channels[name];
             }
         }
+		if(channel_node->first_node("init"))
+		{
+        	channels[name]->push(channel_node->first_node("init")->value());
+		}
     }
 
     for (rapidxml::xml_node<> *process_node = workflow_node->first_node("process");
@@ -61,6 +65,7 @@ std::pair<RawChannel *, RawChannel *> Parser::parse(const std::string &filename,
              input_node = input_node->next_sibling("input"))
         {
             input_names.push_back(input_node->value());
+			assert(channels[input_node->value()] && "No channel found");
             input_channels.push_back(channels[input_node->value()]);
         }
         std::string output_name = process_node->first_node("output")->value();
