@@ -18,6 +18,14 @@
     <xs:attribute name="name" type="xs:string" use="required"/>
 </xs:complexType>
 
+<xs:complexType name="muxType">
+    <xs:sequence>
+        <xs:element name="input" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element name="output" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:string" use="required"/>
+</xs:complexType>
+
 <xs:complexType name="processType">
     <xs:sequence>
         <xs:element name="input" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
@@ -30,6 +38,7 @@
 <xs:complexType name="workflowType">
     <xs:sequence>
         <xs:element name="channel" type="channelType" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element name="mux" type="channelType" minOccurs="0" maxOccurs="unbounded"/>
         <xs:element name="process" type="processType" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
 </xs:complexType>

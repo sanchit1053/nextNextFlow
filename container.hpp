@@ -27,11 +27,14 @@ public:
 
 private:
     config m_config;
+    bool m_output_ready;
 
 public:
     Container(const config &config);
     bool poll();
+    bool poll_output();
     pid_t run();
+    void output_ready();
     void output();
     ~Container();
 };

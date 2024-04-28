@@ -1,5 +1,5 @@
-orchestrator: orchestrator.cpp container.cpp
-	g++ orchestrator.cpp container.cpp -o orchestrator -lfmt
+orchestrator: orchestrator.cpp container.cpp mux.cpp
+	g++ orchestrator.cpp container.cpp mux.cpp -o orchestrator -lfmt
 
 .PHONY: clean
 

@@ -20,6 +20,7 @@ Container::Container(const config &config)
     {
         LOG(ERROR, "Incorrect input length");
     }
+    m_output_ready = false;
     std::string f = fmt::format("docker run --name {0} -d {1}", m_config.m_name, m_config.m_image_name);
     LOG(DEBUG, f);
     system(f.c_str());
@@ -37,6 +38,11 @@ bool Container::poll()
         }
     }
     return ret;
+}
+
+bool Container::poll_output()
+{
+    return m_output_ready;
 }
 
 pid_t Container::run()
@@ -76,6 +82,11 @@ pid_t Container::run()
     return child;
 }
 
+void Container::output_ready()
+{
+    m_output_ready = true;
+}
+
 void Container::output()
 {
     system(fmt::format("docker cp {}:{} scratch/", m_config.m_name, m_config.m_output_name).c_str());
@@ -90,6 +101,7 @@ void Container::output()
     }
     fin.close();
     std::filesystem::remove(fmt::format("scratch/{}",m_config.m_output_name));
+    m_output_ready = false;
 }
 
 Container::~Container()

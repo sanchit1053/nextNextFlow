@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<workflow
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:noNamespaceSchemaLocation="workflow.xsd">
+
+<channel name="c1">
+    <global>in</global>
+</channel>
+<channel name="c2"/>
+<channel name="c3"/>
+<channel name="c4">
+    <global>out</global>
+</channel>
+<mux name="m1">
+    <input>c1</input>
+    <output>c2</output>
+</mux>
+<mux name="m2">
+    <input>c3</input>
+    <output>c4</output>
+</mux>
+<process name="p1">
+    <input>c2</input>
+    <output>c3</output>
+    <command>#!/bin/sh&#xA;sleep 1&#xA;cat c2  | cut -c -6 &gt; c3</command>
+</process>
+
+</workflow>

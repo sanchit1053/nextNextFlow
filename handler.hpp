@@ -21,7 +21,7 @@ void Handler::setup_handler(std::unordered_map<pid_t, Container *> &output_mappi
       signal(SIGCHLD, Handler::signal_handler);
       if (output_mapping.find(pid) != output_mapping.end())
       {
-         output_mapping[pid]->output();
+         output_mapping[pid]->output_ready();
       }
    };
    signal(SIGCHLD, Handler::signal_handler);

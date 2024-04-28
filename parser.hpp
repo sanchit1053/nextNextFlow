@@ -12,10 +12,10 @@ namespace Parser
 {
     std::string IN = "in";
     std::string OUT = "out";
-    std::pair<RawChannel *, RawChannel *> parse(const std::string &filename, std::unordered_map<std::string, RawChannel *> &channels, std::unordered_map<std::string, Container *> &processes, std::unordered_map<pid_t, Container *> &output_mapping);
+    std::pair<RawChannel *, RawChannel *> parse(const std::string &filename, std::unordered_map<std::string, RawChannel *> &channels, std::unordered_map<std::string, Mux *> &muxes, std::unordered_map<std::string, Container *> &processes, std::unordered_map<pid_t, Container *> &output_mapping);
 };
 
-std::pair<RawChannel *, RawChannel *> Parser::parse(const std::string &filename, std::unordered_map<std::string, RawChannel *> &channels, std::unordered_map<std::string, Container *> &processes, std::unordered_map<pid_t, Container *> &output_mapping)
+std::pair<RawChannel *, RawChannel *> Parser::parse(const std::string &filename, std::unordered_map<std::string, RawChannel *> &channels, std::unordered_map<std::string, Mux *> &muxes, std::unordered_map<std::string, Container *> &processes, std::unordered_map<pid_t, Container *> &output_mapping)
 {
     rapidxml::xml_document<> doc;
     rapidxml::file<> xmlFile(filename.c_str());
@@ -47,6 +47,31 @@ std::pair<RawChannel *, RawChannel *> Parser::parse(const std::string &filename,
                 io_pair.second = channels[name];
             }
         }
+    }
+
+    for (rapidxml::xml_node<> *mux_node = workflow_node->first_node("mux");
+         mux_node != nullptr;
+         mux_node = mux_node->next_sibling("mux"))
+    {
+        std::string name = mux_node->first_attribute("name")->value();
+        std::vector<RawChannel *> input_channels;
+        std::vector<RawChannel *> output_channels;
+        for (rapidxml::xml_node<> *input_node = mux_node->first_node("input");
+             input_node != nullptr;
+             input_node = input_node->next_sibling("input"))
+        {
+            input_channels.push_back(channels[input_node->value()]);
+        }
+        for (rapidxml::xml_node<> *output_node = mux_node->first_node("output");
+             output_node != nullptr;
+             output_node = output_node->next_sibling("output"))
+        {
+            output_channels.push_back(channels[output_node->value()]);
+        }
+        muxes[name] = new Mux(
+            Mux::config(
+                {input_channels,
+                 output_channels}));
     }
 
     for (rapidxml::xml_node<> *process_node = workflow_node->first_node("process");
