@@ -14,6 +14,7 @@
         <xs:element name="input" type="xs:string" minOccurs="0"/>
         <xs:element name="output" type="xs:string" minOccurs="0"/>
         <xs:element name="global" type="globalType" minOccurs="0"/>
+        <xs:element name="init" type="xs:string" minOccurs="0"/>
     </xs:sequence>
     <xs:attribute name="name" type="xs:string" use="required"/>
 </xs:complexType>

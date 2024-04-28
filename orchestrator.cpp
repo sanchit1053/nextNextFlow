@@ -29,10 +29,10 @@ int main(int argc, char *argv[])
     std::unordered_map<std::string, Container *> processes;
     auto [input_channel, output_channel] = Parser::parse(argv[1], channels, muxes, processes, output_mapping);
 
-    if (input_channel)
-    {
-        input_channel->push("Some data\n");
-    }
+    // if (input_channel)
+    // {
+    //     input_channel->push("Some data\n");
+    // }
 
     while (true)
     {
