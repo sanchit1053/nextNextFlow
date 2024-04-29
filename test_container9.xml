@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<workflow
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:noNamespaceSchemaLocation="workflow.xsd">
+
+<channel name="c1">
+    <global>in</global>
+	<init>3</init>
+</channel>
+<channel name="c2"/>
+<channel name="c3">
+    <global>out</global>
+</channel>
+<channel name="c4"/>
+<channel name="c5"/>
+<mux name="m1">
+    <input>c1</input>
+    <input>c5</input>
+    <output>c2</output>
+</mux>
+<process name="p1">
+    <input>c2</input>
+    <output>c3</output>
+    <output>c4</output>
+    <script>scripts/9.1.sh</script>
+</process>
+<process name="p2">
+    <input>c4</input>
+    <output>c5</output>
+    <script>scripts/9.2.sh</script>
+</process>
+
+</workflow>

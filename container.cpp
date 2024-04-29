@@ -21,7 +21,10 @@ Container::Container(const config &config)
         LOG(ERROR, "Incorrect input length");
     }
     m_output_ready = false;
-    std::string f = fmt::format("docker run --name {0} -d {1}", m_config.m_name, m_config.m_image_name);
+    std::ofstream fout;
+    fout.open(fmt::format("storage/{0}", m_config.m_name));
+    fout.close();
+    std::string f = fmt::format("docker run --mount type=bind,source={0}/storage/{1},target=/disk --name {1} -d {2}", std::filesystem::current_path().string(), m_config.m_name, m_config.m_image_name);
     LOG(DEBUG, f);
     system(f.c_str());
 }
