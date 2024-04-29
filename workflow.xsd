@@ -30,8 +30,11 @@
 <xs:complexType name="processType">
     <xs:sequence>
         <xs:element name="input" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
-        <xs:element name="output" type="xs:string" minOccurs="0"/>
-        <xs:element name="command" type="xs:string"/>
+        <xs:element name="output" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:choice>
+            <xs:element name="command" type="xs:string"/>
+            <xs:element name="script" type="xs:string"/>
+        </xs:choice>
     </xs:sequence>
     <xs:attribute name="name" type="xs:string" use="required"/>
 </xs:complexType>

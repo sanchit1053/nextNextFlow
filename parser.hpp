@@ -7,6 +7,8 @@
 #include "rapidxml-1.13/rapidxml.hpp"
 #include "rapidxml-1.13/rapidxml_utils.hpp"
 #include <tuple>
+#include <fstream>
+#include <filesystem>
 
 namespace Parser
 {
@@ -47,10 +49,10 @@ std::pair<std::vector<RawChannel *>, RawChannel *> Parser::parse(const std::stri
                 io_pair.second = channels[name];
             }
         }
-		if(channel_node->first_node("init"))
-		{
-        	channels[name]->push(channel_node->first_node("init")->value());
-		}
+        if (channel_node->first_node("init"))
+        {
+            channels[name]->push(channel_node->first_node("init")->value());
+        }
     }
 
     for (rapidxml::xml_node<> *mux_node = workflow_node->first_node("mux");
@@ -90,22 +92,46 @@ std::pair<std::vector<RawChannel *>, RawChannel *> Parser::parse(const std::stri
              input_node = input_node->next_sibling("input"))
         {
             input_names.push_back(input_node->value());
-			assert(channels[input_node->value()] && "No channel found");
+            assert(channels[input_node->value()] && "No channel found");
             input_channels.push_back(channels[input_node->value()]);
         }
-        std::string output_name = process_node->first_node("output")->value();
-        RawChannel *output_channel = channels[process_node->first_node("output")->value()];
-        std::string script = process_node->first_node("command")->value();
+        std::vector<std::string> output_names;
+        std::vector<RawChannel *> output_channels;
+        for (rapidxml::xml_node<> *output_node = process_node->first_node("output");
+             output_node != nullptr;
+             output_node = output_node->next_sibling("output"))
+        {
+            output_names.push_back(output_node->value());
+            assert(channels[output_node->value()] && "No channel found");
+            output_channels.push_back(channels[output_node->value()]);
+        }
+        std::string script;
+        if (process_node->first_node("command"))
+        {
+            script = process_node->first_node("command")->value();
+        }
+        else if (process_node->first_node("script"))
+        {
+            std::ifstream fin;
+            fin.open(process_node->first_node("script")->value());
+            std::stringstream data;
+            data << fin.rdbuf();
+            script = data.str();
+        }
+        else
+        {
+            LOG(ERROR, "No command or script found");
+        }
         LOG(DEBUG, script);
         processes[name] = new Container(
             Container::config(
                 {"nginx:alpine",
                  name,
                  input_names,
-                 output_name,
+                 output_names,
                  script,
                  input_channels,
-                 output_channel,
+                 output_channels,
                  &output_mapping}));
     }
     return io_pair;

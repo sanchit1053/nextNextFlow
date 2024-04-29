@@ -18,10 +18,10 @@ public:
         std::string m_image_name;
         std::string m_name;
         std::vector<std::string> m_input_names;
-        std::string m_output_name;
+        std::vector<std::string> m_output_names;
         std::string m_script;
         std::vector<RawChannel *> m_input_channels;
-        RawChannel *m_output_channel;
+        std::vector<RawChannel *> m_output_channels;
         std::unordered_map<pid_t, Container *> *m_output_mapping;
     };
 
