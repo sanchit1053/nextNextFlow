@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
 
     system("mkdir -p scratch"); // ew wtf
     system("chmod 777 scratch/");
-    system("mkdir -p storage"); // ew wtf
+    system("mkdir -p storage");
     system("chmod 777 storage/");
     std::unordered_map<pid_t, Container *> output_mapping;
     Handler::setup_handler(output_mapping);

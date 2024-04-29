@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<workflow
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:noNamespaceSchemaLocation="workflow.xsd">
+
+<channel name="c1"/>
+<channel name="c2">
+    <global>out</global>
+</channel>
+<process name="p1">
+    <output>c1</output>
+    <script>scripts/10.1.sh</script>
+</process>
+<process name="p2">
+    <input>c1</input>
+    <output>c2</output>
+    <script>scripts/10.2.sh</script>
+</process>
+
+</workflow>
