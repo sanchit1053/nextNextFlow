@@ -3,8 +3,12 @@
 
 #include "channel.hpp"
 #include <vector>
-#include <string>
 
+/**
+ * @class Mux
+ * @brief Class that directly connects channels with each other without any process in between, Moves data from all input channels to all output channels
+ *
+ */
 class Mux
 {
 public:

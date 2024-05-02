@@ -8,23 +8,27 @@ xsi:noNamespaceSchemaLocation="workflow.xsd">
     <global>in</global>
 	<init> Value in c1 </init>
 </channel>
+
 <channel name="c2"/>
 <channel name="c3"/>
 <channel name="c4">
     <global>out</global>
 </channel>
+
 <mux name="m1">
     <input>c1</input>
     <output>c2</output>
 </mux>
+
 <mux name="m2">
-    <input>c3</input>
-    <output>c4</output>
-</mux>
-<process name="p1">
     <input>c2</input>
     <output>c3</output>
-    <command>#!/bin/sh&#xA;sleep 1&#xA;cat c2  | cut -c -6 &gt; c3</command>
+</mux>
+
+<process name="p1">
+    <input>c3</input>
+    <output>c4</output>
+	<command>#!/bin/sh&#xA;sleep 1&#xA;cat c3 > c4</command>
 </process>
 
 </workflow>

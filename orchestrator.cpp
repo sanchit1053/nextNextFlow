@@ -8,6 +8,11 @@
 #include <string>
 #include <unordered_map>
 
+bool running = true;
+void handle_sigint(int signum){
+	running = false;
+}
+
 int main(int argc, char *argv[])
 {
     if (argc != 2)
@@ -15,6 +20,7 @@ int main(int argc, char *argv[])
         LOG(ERROR, "Correct usage: orchestrator <xml-file-name>");
         exit(1);
     }
+
 
     system("mkdir -p scratch"); // ew wtf
     system("chmod 777 scratch/");
@@ -31,39 +37,47 @@ int main(int argc, char *argv[])
     std::unordered_map<std::string, Container *> processes;
     auto [input_channel, output_channel] = Parser::parse(argv[1], channels, muxes, processes, output_mapping);
 
-    // if (input_channel)
-    // {
-    //     input_channel->push("Some data\n");
-    // }
+   	signal(SIGINT, handle_sigint);
 
+	// main loop of the code loop through the program
     while (true)
     {
-        // can we have global input here?
         for (auto &it : processes)
         {
             if (it.second->poll())
             {
+				LOG(DEBUG, fmt::format("Running code {}", it.first));
                 it.second->run();
             }
             if (it.second->poll_output())
             {
+				LOG(DEBUG, fmt::format("outputing from {}", it.first));
                 it.second->output();
             }
         }
+
         for (auto &it : muxes)
         {
             if (it.second->poll())
             {
+				LOG(DEBUG,  fmt::format("muxing {}", it.first));
                 it.second->output();
             }
         }
+
         if (output_channel && output_channel->poll())
         {
             LOG(INFO, output_channel->pop());
             // break;
         }
+		if(!running){
+			break;
+		}
     }
 
+	LOG(INFO, "Cleaning up");
+
+	// clean up
     system("rm -rf scratch/");
     system("rm -rf storage/");
     for (auto &it : processes)

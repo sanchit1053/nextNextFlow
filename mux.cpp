@@ -1,4 +1,6 @@
 #include "mux.hpp"
+#include "logger.hpp"
+#include <fmt/format.h>
 
 Mux::Mux(const config &config)
 {

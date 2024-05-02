@@ -6,6 +6,7 @@ xsi:noNamespaceSchemaLocation="workflow.xsd">
 
 <channel name="c1">
     <global>in</global>
+	<init> C1 Value </init>
 </channel>
 <channel name="c2"/>
 <channel name="c3">

@@ -24,11 +24,18 @@ Container::Container(const config &config)
     std::ofstream fout;
     fout.open(fmt::format("storage/{0}", m_config.m_name));
     fout.close();
-    std::string f = fmt::format("docker run --mount type=bind,source={0}/storage/{1},target=/disk --name {1} -d {2}", std::filesystem::current_path().string(), m_config.m_name, m_config.m_image_name);
+	
+	LOG(DEBUG, fmt::format("Created container file {}", m_config.m_name));
+	// run docker with mount point given and specify the name of container and image used
+    std::string f = fmt::format("docker run --mount type=bind,source=\"{0}/storage/{1}\",target=/disk --name {1} -d {2}", std::filesystem::current_path().string(), m_config.m_name, m_config.m_image_name);
     LOG(DEBUG, f);
     system(f.c_str());
 }
 
+/**
+ * @brief Check if container is available to be run (all inputs channels are active)
+ *
+ */
 bool Container::poll()
 {
     bool ret = true;
@@ -43,6 +50,10 @@ bool Container::poll()
     return ret;
 }
 
+/**
+ * @brief check if output ready
+ *
+ */
 bool Container::poll_output()
 {
     return m_output_ready;
@@ -50,6 +61,7 @@ bool Container::poll_output()
 
 pid_t Container::run()
 {
+	// copy the input channels into the container
     for (int i = 0; i < (int)m_config.m_input_names.size(); i++)
     {
         std::string data = m_config.m_input_channels[i]->pop();
@@ -59,6 +71,8 @@ pid_t Container::run()
         fout.close();
         system(fmt::format("docker cp temp {}:/{}", m_config.m_name, m_config.m_input_names[i]).c_str());
     }
+
+	// copy the output channels into the container
     for (int i = 0; i < (int)m_config.m_output_names.size(); i++)
     {
         std::ofstream fout;
@@ -67,6 +81,7 @@ pid_t Container::run()
         system(fmt::format("docker cp temp {}:/{}", m_config.m_name, m_config.m_output_names[i]).c_str());
     }
 
+	// move the workflow (script to run) into docker
     std::ofstream fout;
     fout.open("temp");
     fout << m_config.m_script;
@@ -79,6 +94,7 @@ pid_t Container::run()
     pid_t child = fork();
     if (child == 0)
     {
+		// execute the script in another thread
         system(fmt::format("docker exec {} /script.sh", m_config.m_name).c_str());
         exit(0);
     }
@@ -89,11 +105,13 @@ pid_t Container::run()
     return child;
 }
 
+// script is finished running
 void Container::output_ready()
 {
     m_output_ready = true;
 }
 
+// put the data in docker to the output channels
 void Container::output()
 {
     for (int i = 0; i < (int)m_config.m_output_names.size(); i++)
@@ -117,6 +135,7 @@ void Container::output()
     m_output_ready = false;
 }
 
+// clean the doker by stopping and remove the container
 Container::~Container()
 {
     system(fmt::format("docker stop {}", m_config.m_name).c_str());

@@ -6,9 +6,9 @@
 #include "logger.hpp"
 #include "rapidxml-1.13/rapidxml.hpp"
 #include "rapidxml-1.13/rapidxml_utils.hpp"
-#include <tuple>
 #include <fstream>
-#include <filesystem>
+#include <sstream>
+#include "mux.hpp"
 
 namespace Parser
 {
@@ -17,6 +17,7 @@ namespace Parser
     std::pair<std::vector<RawChannel *>, RawChannel *> parse(const std::string &filename, std::unordered_map<std::string, RawChannel *> &channels, std::unordered_map<std::string, Mux *> &muxes, std::unordered_map<std::string, Container *> &processes, std::unordered_map<pid_t, Container *> &output_mapping);
 };
 
+// parse a xml file to fill up data structs
 std::pair<std::vector<RawChannel *>, RawChannel *> Parser::parse(const std::string &filename, std::unordered_map<std::string, RawChannel *> &channels, std::unordered_map<std::string, Mux *> &muxes, std::unordered_map<std::string, Container *> &processes, std::unordered_map<pid_t, Container *> &output_mapping)
 {
     rapidxml::xml_document<> doc;
@@ -27,10 +28,12 @@ std::pair<std::vector<RawChannel *>, RawChannel *> Parser::parse(const std::stri
 
     std::pair<std::vector<RawChannel *>, RawChannel *> io_pair;
 
+	// parse each channel object 
     for (rapidxml::xml_node<> *channel_node = workflow_node->first_node("channel");
          channel_node != nullptr;
          channel_node = channel_node->next_sibling("channel"))
     {
+		// get name
         std::string name = channel_node->first_attribute("name")->value();
         channels[name] = new Channel<std::string>(Channel<std::string>::config({
             [](std::string s)
@@ -38,6 +41,8 @@ std::pair<std::vector<RawChannel *>, RawChannel *> Parser::parse(const std::stri
             [](std::string s)
             { return s; },
         }));
+
+		// get whether input or output
         if (channel_node->first_node("global"))
         {
             if (channel_node->first_node("global")->value() == Parser::IN)
@@ -49,6 +54,8 @@ std::pair<std::vector<RawChannel *>, RawChannel *> Parser::parse(const std::stri
                 io_pair.second = channels[name];
             }
         }
+
+		// get the initial value of the object
         if (channel_node->first_node("init"))
         {
             channels[name]->push(channel_node->first_node("init")->value());
